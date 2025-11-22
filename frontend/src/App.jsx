@@ -10,6 +10,7 @@ import RegisterInvestorPage from './pages/RegisterInvestorPage';
 import RegisterOwnerPage from './pages/RegisterOwnerPage';
 import MarketplacePage from './pages/MarketplacePage';
 import PropertyDetailsPage from './pages/PropertyDetailsPage';
+import BettingPage from './pages/BettingPage';
 import Dashboard from './pages/Dashboard';
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/marketplace" element={<MarketplacePage />} />
             <Route path="/marketplace/:id" element={<PropertyDetailsPage />} />
+            <Route path="/betting" element={<BettingPage />} />
             <Route 
               path="/select-role" 
               element={
