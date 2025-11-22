@@ -1,12 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import reactLogo from "./assets/react.svg";
+import viteLogo from "/vite.svg";
 import "./App.css";
 
-import BuilderRegister from "./components/builder/BuilderRegister";
-import BuilderProfile from "./components/builder/BuilderProfile";
+import { getContract } from "./utils/contract";
+import { getMantleBalance } from "./utils/wallet";
 
 function App() {
   const [wallet, setWallet] = useState(null);
-  const [page, setPage] = useState("register");
+  const [unlockTime, setUnlockTime] = useState(null);
+  const [balance, setBalance] = useState(null);
 
   const connectWallet = async () => {
     if (!window.ethereum) return alert("Install MetaMask!");
@@ -18,31 +21,58 @@ function App() {
     setWallet(accounts[0]);
   };
 
-  const disconnectWallet = () => {
-    setWallet(null);
-    setPage("register");
+  const loadUnlockTime = async () => {
+    try {
+      const contract = await getContract();
+      const time = await contract.unlockTime();
+      setUnlockTime(Number(time));
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  return (
-    <div style={{ padding: "20px" }}>
-      <h1>Terra Platform – Builder Panel</h1>
+  const loadBalance = async () => {
+    if (!wallet) return;
+    const bal = await getMantleBalance(wallet);
+    setBalance(bal);
+  };
 
-      <button onClick={wallet ? disconnectWallet : connectWallet}>
-        {wallet ? `Disconnect: ${wallet.slice(0, 6)}...` : "Connect Wallet"}
+  useEffect(() => {
+    if (wallet) {
+      loadUnlockTime();
+      loadBalance();
+    }
+  }, [wallet]);
+
+  return (
+    <>
+      <h1>Mantle Wallet Dashboard</h1>
+
+      <button onClick={connectWallet}>
+        {wallet ? `Connected: ${wallet.slice(0, 6)}...` : "Connect Wallet"}
       </button>
 
       {wallet && (
         <>
-          <div style={{ marginTop: "20px" }}>
-            <button onClick={() => setPage("register")}>Register Builder</button>
-            <button onClick={() => setPage("profile")}>View Profile</button>
+          <div className="card">
+            <h3>Wallet Balance</h3>
+            <p>{balance ? `${balance} MNT (testnet)` : "Loading..."}</p>
           </div>
 
-          {page === "register" && <BuilderRegister />}
-          {page === "profile" && <BuilderProfile address={wallet} />}
+          <div className="card">
+            <h3>Contract Unlock Time</h3>
+            {unlockTime ? (
+              <>
+                <p>Timestamp: {unlockTime}</p>
+                <p>Readable: {new Date(unlockTime * 1000).toLocaleString()}</p>
+              </>
+            ) : (
+              <p>Loading...</p>
+            )}
+          </div>
         </>
       )}
-    </div>
+    </>
   );
 }
 

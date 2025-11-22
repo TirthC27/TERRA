@@ -1,15 +1,10 @@
 import { ethers } from "ethers";
-import abi from "../abi/BuilderRegistry.json";
+import Lock from "../abi/Lock.json";
 
-const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || "0x11A50F2f38252432adE0bb06877b70f8D297C046";
+const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS;
 
-export async function getContract(readOnly = false) {
+export const getContract = async () => {
   const provider = new ethers.BrowserProvider(window.ethereum);
-  if (readOnly) {
-    return new ethers.Contract(CONTRACT_ADDRESS, abi.abi, provider);
-  } else {
-    await provider.send("eth_requestAccounts", []);
-    const signer = await provider.getSigner();
-    return new ethers.Contract(CONTRACT_ADDRESS, abi.abi, signer);
-  }
-}
+  const signer = await provider.getSigner();
+  return new ethers.Contract(CONTRACT_ADDRESS, Lock.abi, signer);
+};

@@ -1,11 +1,21 @@
 const hre = require("hardhat");
 
 async function main() {
-  const BuilderRegistry = await hre.ethers.getContractFactory("BuilderRegistry");
-  const builderRegistry = await BuilderRegistry.deploy();
-  await builderRegistry.waitForDeployment();
 
-  console.log("BuilderRegistry deployed at:", await builderRegistry.getAddress());
+  // unlockTime = current time + 60 seconds (1 minute)
+  const unlockTime = Math.floor(Date.now() / 1000) + 60;
+
+  const Lock = await hre.ethers.getContractFactory("Lock");
+
+  // Contract requires the unlockTime argument + optional ETH value
+  const lock = await Lock.deploy(unlockTime, {
+    value: hre.ethers.parseEther("0.001") // optional, you can set to "0"
+  });
+
+  await lock.waitForDeployment();
+
+  console.log("Contract deployed at:", await lock.getAddress());
+  console.log("Unlock Time:", unlockTime);
 }
 
 main().catch((error) => {
